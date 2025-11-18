@@ -2,10 +2,25 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "enables the default permissions",
-  "windows": [
-    "main"
-  ],
+  "windows": ["main"],
+  "webviews": ["main"],
   "permissions": [
-    "core:default"
+    "core:default",
+    "core:window:allow-start-dragging"
+  ],
+  "capabilities": [
+    {
+      "identifier": "store",
+      "description": "Tauri Store plugin permissions",
+      "permissions": [
+        "store:default",
+        "store:allow-load",
+        "store:allow-get",
+        "store:allow-set",
+        "store:allow-save"
+      ],
+      "windows": ["main"],
+      "webviews": ["main"]
+    }
   ]
 }
