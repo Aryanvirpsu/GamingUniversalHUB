@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tauri_plugin_store::Builder;
+use tauri_plugin_store::Builder as StorePlugin;
 use std::{fs, path::PathBuf};
 use serde::Serialize;
 
@@ -11,6 +11,28 @@ struct SteamGame {
     name: String,
     install_dir: String,
     installed: bool,
+}
+
+#[tauri::command]
+fn get_steam_id() -> Result<String, String> {
+    let dirs = [
+        "C:/Program Files (x86)/Steam/config/loginusers.vdf",
+        "C:/Program Files/Steam/config/loginusers.vdf",
+        "D:/Steam/config/loginusers.vdf",
+        "E:/Steam/config/loginusers.vdf",
+    ];
+
+    for path in dirs {
+        if std::path::Path::new(path).exists() {
+            let text = std::fs::read_to_string(path).unwrap_or_default();
+            let re = regex::Regex::new(r#"(\d{17})"#).unwrap();
+            if let Some(cap) = re.captures(&text) {
+                return Ok(cap[1].to_string());
+            }
+        }
+    }
+
+    Err("Steam ID not found".into())
 }
 
 // ---- Steam Scanner Command ---- //
@@ -90,14 +112,20 @@ async fn launch_game(app_id: String) -> Result<(), String> {
     Ok(())
 }
 
-
 fn main() {
     tauri::Builder::default()
-        .plugin(Builder::default().build())
+        // Tauri Store plugin
+        .plugin(StorePlugin::default().build())
+        
+        // Commands you expose to the frontend
         .invoke_handler(tauri::generate_handler![
             scan_steam_games,
-            launch_game ])
+            launch_game,
+            get_steam_id
+        ])
+
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
 

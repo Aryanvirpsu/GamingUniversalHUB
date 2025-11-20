@@ -24,4 +24,5 @@ log = "0.4"
 tauri = { version = "2.9.1", features = ["tray-icon"] }
 tauri-plugin-log = "2"
 tauri-plugin-store = { version = "2.0.0-rc.4" }
+regex = "1.10"
 
